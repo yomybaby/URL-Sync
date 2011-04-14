@@ -3,7 +3,7 @@ Titanium.UI.setBackgroundColor('#000');
 
 var webview = Titanium.UI.createWebView({
 	url:'http://m.daum.net',
-	bottom:40
+	bottom:40 
 });
 
 var win = Titanium.UI.createWindow();
