@@ -1,1 +1,0 @@
-http://missvc2.daumcorp.com:9101/dinner/userCheck.do
