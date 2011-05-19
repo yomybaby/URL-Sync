@@ -10,6 +10,7 @@ var win = Titanium.UI.createWindow();
 win.add(webview);
 
 Ti.App.Properties.setBool('_watching', false);
+
 var watchURLChange = function(host, port, win){
     if(Ti.App.Properties.getBool('_watching')){ return false; }
     Ti.App.Properties.setBool('_watching', true);
@@ -101,19 +102,49 @@ var watchURLChange = function(host, port, win){
 		}
 	});
 	
+	// setting Btn & setting Window
+	var settingBtn = Ti.UI.createButton({
+		title:'설정'
+	});
+	
+	var preferenceWin = Ti.UI.createWindow({
+		title:'설정'
+	});
+	var closeBtn = Ti.UI.createButton({
+		title:'닫'
+	});
+	
+	var autoReloadRow = Ti.UI.createTableViewRow({
+		title:"Auto Reload"
+	});
+	autoReloadRow.add(reloadBtn);
+	
+	var prefTable = Ti.UI.TableView({
+		data : [autoReloadRow],
+		style: Titanium.UI.iPhone.TableViewStyle.GROUPED
+	});
+	preferenceWin.add(prefTable);
+	
+	settingBtn.addEventListener('click',function(){
+		preferenceWin.open();
+	});
+	
+	
 	// 버튼 wrap
-	var btnView = Titanium.UI.createView({
+	var btnWrapView = Titanium.UI.createView({
 		width:'100%',
 		height:40,
 		backgroundColor:'#2A2623',
 		layout:'horizontal',
 		bottom:0
 	});
-	btnView.add(backBtn);
-	btnView.add(forwardBtn);
-	btnView.add(reloadBtn);
-	btnView.add(autoSwitch);
-	win.add(btnView);
+	
+	btnWrapView.add(backBtn);
+	btnWrapView.add(forwardBtn);
+	btnWrapView.add(reloadBtn);
+	btnWrapView.add(settingBtn);
+	//btnWrapView.add(autoSwitch);
+	win.add(btnWrapView);
 	
 	//webview의 loding activity indicator
 	var toolActInd = Titanium.UI.createActivityIndicator({

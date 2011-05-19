@@ -1,6 +1,6 @@
-#Tue Apr 12 10:29:42 KST 2011
+#Fri May 13 16:48:59 KST 2011
 eclipse.preferences.version=1
-provisioning_profiles/development/FC1C3B01-0ECE-40AA-95C7-4E642C141550/appid=com.yomybaby.app.urlsync
-provisioning_profiles/development/FC1C3B01-0ECE-40AA-95C7-4E642C141550/filepath=/Users/YoMyBaby/Downloads/Urlsync_Development.mobileprovision
-provisioning_profiles/development/FC1C3B01-0ECE-40AA-95C7-4E642C141550/name=Urlsync Development
-provisioning_profiles/development/FC1C3B01-0ECE-40AA-95C7-4E642C141550/uuid=FC1C3B01-0ECE-40AA-95C7-4E642C141550
+provisioning_profiles/development/0D09CE2D-5AD7-4C0B-9B3E-457AD965A1ED/appid=com.yomybaby.app.urlsync
+provisioning_profiles/development/0D09CE2D-5AD7-4C0B-9B3E-457AD965A1ED/filepath=/Users/YoMyBaby/Downloads/Urlsync_Development.mobileprovision
+provisioning_profiles/development/0D09CE2D-5AD7-4C0B-9B3E-457AD965A1ED/name=Urlsync Development
+provisioning_profiles/development/0D09CE2D-5AD7-4C0B-9B3E-457AD965A1ED/uuid=0D09CE2D-5AD7-4C0B-9B3E-457AD965A1ED
