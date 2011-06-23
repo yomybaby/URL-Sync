@@ -102,6 +102,23 @@ void MyUncaughtExceptionHandler(NSException *exception)
 	return [sharedApp controller];
 }
 
+-(TiContextGroupRef)contextGroup
+{
+	if(contextGroup == nil)
+	{
+		contextGroup = TiContextGroupCreate();
+		TiContextGroupRetain(contextGroup);
+	}
+	return contextGroup;
+}
+
+
++(TiContextGroupRef)contextGroup
+{
+	return [sharedApp contextGroup];
+}
+
+
 -(void)startNetwork
 {
 	ENSURE_UI_THREAD_0_ARGS;
@@ -263,7 +280,7 @@ void MyUncaughtExceptionHandler(NSException *exception)
 
 - (void)boot
 {
-	NSLog(@"[INFO] %@/%@ (%s.f6cae16)",TI_APPLICATION_NAME,TI_APPLICATION_VERSION,TI_VERSION_STR);
+	NSLog(@"[INFO] %@/%@ (%s.e6afca8)",TI_APPLICATION_NAME,TI_APPLICATION_VERSION,TI_VERSION_STR);
 	
 	sessionId = [[TiUtils createUUID] retain];
 	TITANIUM_VERSION = [[NSString stringWithCString:TI_VERSION_STR encoding:NSUTF8StringEncoding] retain];
@@ -273,7 +290,7 @@ void MyUncaughtExceptionHandler(NSException *exception)
         NSMutableDictionary *params = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
         NSString *host = [params objectForKey:@"host"];
         NSString *port = [params objectForKey:@"port"];
-        if (![host isEqual:@""] && ![host isEqual:@"__DEBUGGER_HOST__"])
+        if (host != nil && ![host isEqual:@""] && ![host isEqual:@"__DEBUGGER_HOST__"])
         {
             [self setDebugMode:YES];
             TiDebuggerStart(host,[port intValue]);
@@ -509,6 +526,8 @@ void MyUncaughtExceptionHandler(NSException *exception)
 
 #pragma mark Push Notification Delegates
 
+#ifdef USE_TI_NETWORKREGISTERFORPUSHNOTIFICATIONS
+
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
 {
 	// NOTE: this is called when the app is *running* after receiving a push notification
@@ -556,6 +575,8 @@ void MyUncaughtExceptionHandler(NSException *exception)
 		[remoteNotificationDelegate performSelector:@selector(application:didFailToRegisterForRemoteNotificationsWithError:) withObject:application withObject:error];
 	}
 }
+
+#endif
 
 //TODO: this should be compiled out in production mode
 -(void)showModalError:(NSString*)message

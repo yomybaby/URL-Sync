@@ -1,0 +1,14 @@
+Logfile initialized
+[INFO] logfile = /Users/YoMyBaby/Documents/Titanium Studio Workspace/URLSync/build.log
+[DEBUG] /Library/Application Support/Titanium/mobilesdk/osx/1.7.0.RC1/android/builder.py simulator URLSync /Developer/SDKs/android-sdk /Users/YoMyBaby/Documents/Titanium Studio Workspace/URLSync com.yomybaby.urlsync 11 WQVGA400 
+[INFO] Building URLSync for Android ... one moment
+[INFO] Titanium SDK version: 1.7.0 (05/15/11 17:26 e6afca8)
+[DEBUG] Waiting for device to be ready ...
+[TRACE] adb devices returned 0 devices/emulators
+[TRACE] adb devices returned 0 devices/emulators
+[TRACE] adb devices returned 0 devices/emulators
+[TRACE] adb devices returned 0 devices/emulators
+[TRACE] adb devices returned 0 devices/emulators
+[TRACE] adb devices returned 0 devices/emulators
+[ERROR] Timed out waiting for emulator to be ready, you may need to close the emulator and try again
+[INFO] Android Emulator has exited

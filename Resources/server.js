@@ -1,3 +1,10 @@
+// Common
+// var persistence = require('persistencejs/lib/persistence').persistence;
+// 
+// var persistenceStore = require('persistencejs/lib/persistence.store.sqlite');
+// persistenceStore.config(persistence, './url.db');
+// var session = persistenceStore.getSession();
+
 // extend array
 Array.prototype.remove = function(e){
 	for(var i=0;i<this.length;i++){
@@ -6,11 +13,8 @@ Array.prototype.remove = function(e){
 };
 
 var file = './url.txt',	//browser에서 보낸 url을 저장해놓는 파
-	fileModifyTime=0;	//url.txt파일의 수정된 시간 저장용 
+	fileModifyTime=0;	//url.txt파일의 수정된 시간 저장용
 
-/**
- * stream server
- */ 
 var sys = require('util'),
 	fs = require('fs'),
 	net = require('net'),
@@ -28,9 +32,9 @@ net.createServer(function(stream) {
 	
 	stream.setTimeout(0);
 	stream.setEncoding('utf8');
-	
     stream.on('connect', function() {
         sys.puts('[S#1] App connected');
+        //while(true);
 		fs.readFile(file, function(err, data){
             stream.write(JSON.stringify({
                 action: 'connect',
@@ -53,69 +57,15 @@ net.createServer(function(stream) {
 			sys.puts("modify Time :" + fileModifyTime);
             fs.readFile(file, function(err, data){
 				//접속된 모든 client로 url을 수정시간과 함께 JSON으로 보냄
+				var newURL = data.toString();
 				clients.forEach(function(c){
 					c.stream.write(JSON.stringify({
                         action: 'changeURL',
-                        url: data.toString()
+                        url: newURL
                     }));
-					sys.puts('[S#1] URL file updated: ' + file + ":" + data.toString());
+					sys.puts('[S#1] URL file updated: ' + file + ":" + newURL);
 				});
             });
         }
     });
-});
-
-
-
-/**
- * http Server
- */
-var http = require('http'),
-	path = require('path'),
-	url = require('url');
-
-http.createServer(function(req,res){
-	var uri = url.parse(req.url).pathname;
-	var queryString = url.parse(req.url).query;
-	console.log('[S#2] ' + uri);
-	switch(uri){
-		case '/rd':
-		case '/redirect':
-			fs.readFile(file, function(err, data){
-				res.writeHead(302, {
-				  'Location': data.toString()
-				});
-				res.end();
-				console.log("[S#2] redirect : " + data.toString());
-            });
-		break;
-		case '/getURL':
-			fs.readFile(file, function(err, data){
-				res.writeHead(200,{"Content-Type" : "text/html"});
-				console.log("[S#2] getURL : " + data.toString());
-				res.write(JSON.stringify({
-					url : data.toString(),
-					mTime : fileModifyTime
-				}));
-				res.end();
-            });
-		break;
-		case '/newURL':
-		default:
-			res.writeHead(200,{"Content-Type" : "text/html"});
-			res.write(queryString);			
-			console.log("[S#2] bookmarklet update :" + queryString);
-			fs.writeFile(file,queryString,function(err){
-				if (err) {
-					console.log("[S#2] write file error");
-				}
-				else {
-					console.log("[S#2] write file success");
-				}
-			});
-			res.end();
-		break;
-	}
-}).listen(8080,function(){
-	console.log('[S#2] http Server Running');
 });

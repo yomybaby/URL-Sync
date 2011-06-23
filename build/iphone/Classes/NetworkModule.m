@@ -13,6 +13,7 @@
 #import "TiApp.h"
 #import "SBJSON.h"
 #import "TiBlob.h"
+#import "TiNetworkSocketProxy.h"
 
 NSString* const INADDR_ANY_token = @"INADDR_ANY";
 
@@ -74,6 +75,7 @@ NSString* const INADDR_ANY_token = @"INADDR_ANY";
 	RELEASE_TO_NIL(pushNotificationCallback);
 	RELEASE_TO_NIL(pushNotificationError);
 	RELEASE_TO_NIL(pushNotificationSuccess);
+    RELEASE_TO_NIL(socketProxy);
 	[super _destroy];
 }
 
@@ -152,6 +154,17 @@ NSString* const INADDR_ANY_token = @"INADDR_ANY";
 	NSArray *newargs = [NSArray arrayWithObjects:@"change",arg,nil];
 	[self removeEventListener:newargs];
 }
+
+// Socket submodule
+#ifdef USE_TI_NETWORKSOCKET
+-(TiProxy*)Socket
+{
+    if (socketProxy == nil) {
+        socketProxy = [[TiNetworkSocketProxy alloc] _initWithPageContext:[self pageContext]];
+    }
+    return socketProxy;
+}
+#endif
 
 - (NSNumber*)online
 {
@@ -289,6 +302,8 @@ MAKE_SYSTEM_PROP(NOTIFICATION_TYPE_SOUND,3);
 
 #pragma mark Push Notification Delegates
 
+#ifdef USE_TI_NETWORKREGISTERFORPUSHNOTIFICATIONS
+
 -(void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
 	// called by TiApp
@@ -321,6 +336,8 @@ MAKE_SYSTEM_PROP(NOTIFICATION_TYPE_SOUND,3);
 		[self _fireEventToListener:@"remote" withObject:event listener:pushNotificationError thisObject:nil];
 	}
 }
+
+#endif
 
 @end
 

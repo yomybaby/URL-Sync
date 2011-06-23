@@ -2,55 +2,88 @@
 Titanium.UI.setBackgroundColor('#000');
 
 var webview = Titanium.UI.createWebView({
-	url:'http://m.daum.net',
-	bottom:40 
+	url:'http://plac.kr/8ptim',
+	bottom:40
 });
 
 var win = Titanium.UI.createWindow();
 win.add(webview);
-
-Ti.App.Properties.setBool('_watching', false);
-
-var watchURLChange = function(host, port, win){
-    if(Ti.App.Properties.getBool('_watching')){ return false; }
-    Ti.App.Properties.setBool('_watching', true);
 	
-    var socket = Titanium.Network.createTCPSocket({
-    	hostName: host, 
+var watchURLChange = function(host, port, win){
+    var connectSocket = Titanium.Network.Socket.createTCP({
+    	host: host, 
     	port: port, 
-    	mode: Titanium.Network.READ_WRITE_MODE
+    	connected:function(e) {
+	        Ti.API.info("Socket <" + e.socket + "> connected to host <" + e.socket.host + ">");
+	        postConnect();
+	    }
     });
     
-    socket.addEventListener('read', function(e) {
-        try {
-            var o = JSON.parse(e.data.text);
-			switch(o.action){
-				case 'changeURL':		
-					Ti.API.info('url Changed : '+o.url);
-					webview.url = o.url;
-                    break;
-				case 'connect':
-                    Ti.API.info('Socket connected');
-					webview.url = o.url;
-                    break;
+    function postConnect() {
+		try {
+			// write some data
+			/*
+			Ti.API.info( "STATUS: sending data");
+			var outData = Ti.createBuffer({
+				value:"Howdy listener socket! How are you?"
+			});
+			var bytesWritten = connectSocket.write(outData);
+			Ti.API.info( "STATUS: <" + bytesWritten + "> bytes written" );
+			*/
+			// start read loop
+			Ti.API.info( "STATUS: reading data" );
+			var readBuffer = Ti.createBuffer({
+				length:1024
+			});
+			var bytesRead = 0;
+	
+			function readCallback(e) {
+				if (e.bytesProcessed == -1) { // EOF
+					Ti.API.info( "STATUS: closing");
+					connectSocket.close(); // close the socket on our end
+					Ti.API.info( "STATUS: closed");
+					return;
+				}
+				var str = Ti.Codec.decodeString({
+					source:readBuffer,
+					length:e.bytesProcessed
+				});
+				Ti.API.info( "RECV FROM LISTENER: " + str);
+				var o = JSON.parse(str);
+				switch(o.action){
+					case 'changeURL':		
+						Ti.API.info('url Changed : '+o.url);
+						webview.url = o.url;
+	                    break;
+					case 'connect':
+	                    Ti.API.info('Socket connected');
+						webview.url = o.url;
+	                    break;
+				}
+				readBuffer.clear(); // clear the buffer before the next read
+	
+				// queue up the next read
+				Ti.Stream.read(connectSocket,readBuffer,readCallback);
 			}
-        } catch(event){ Ti.API.error('read error', event); }
-    });
-
+	
+			Ti.Stream.read(connectSocket,readBuffer,readCallback);
+		} catch (e) {
+			// IO error on socket. socket is closed and connectSocket.error is called
+			Ti.API.info( "STATUS: error - closed");
+		}
+	}
     // Cleanup
     win = win || Ti.UI.currentWindow;
     if(win){ 
         win.addEventListener('close', function(e) {
-        	if (socket.isValid) {
+        	if (connectSocket.isValid) {
         	    Ti.API.log('close socket');
-        		socket.close();
+        		connectSocket.close();
         	}
         });
     }
-
-    socket.connect();
-    socket.write(JSON.stringify({ action: 'echo', message: 'Socket connected' }));
-	
+    connectSocket.connect();
+    //socket.write(JSON.stringify({ action: 'echo', message: 'Socket connected' }));
 };
 
 //webview 아래 컨트롤 view 생성
@@ -103,32 +136,34 @@ var watchURLChange = function(host, port, win){
 	});
 	
 	// setting Btn & setting Window
-	var settingBtn = Ti.UI.createButton({
-		title:'설정'
-	});
-	
-	var preferenceWin = Ti.UI.createWindow({
-		title:'설정'
-	});
-	var closeBtn = Ti.UI.createButton({
-		title:'닫'
-	});
-	
-	var autoReloadRow = Ti.UI.createTableViewRow({
-		title:"Auto Reload"
-	});
-	autoReloadRow.add(reloadBtn);
-	
-	var prefTable = Ti.UI.TableView({
-		data : [autoReloadRow],
-		style: Titanium.UI.iPhone.TableViewStyle.GROUPED
-	});
-	preferenceWin.add(prefTable);
-	
-	settingBtn.addEventListener('click',function(){
-		preferenceWin.open();
-	});
-	
+	(function(){
+		var settingBtn = Ti.UI.createButton({
+			title:'설정'
+		});
+		
+		var preferenceWin = Ti.UI.createWindow({
+			title:'설정'
+		});
+		var closeBtn = Ti.UI.createButton({
+			title:'닫기'
+		});
+		
+		var autoReloadRow = Ti.UI.createTableViewRow({
+			title:"Auto Reload"
+		});
+		autoReloadRow.add(reloadBtn);
+		
+		var prefTable = Ti.UI.createTableView({
+			data : [autoReloadRow],
+			//style: Titanium.UI.iPhone.TableViewStyle.GROUPED
+		});
+		preferenceWin.add(prefTable);
+		
+		settingBtn.addEventListener('click',function(){
+			preferenceWin.open();
+		});
+	})//();
+	////////
 	
 	// 버튼 wrap
 	var btnWrapView = Titanium.UI.createView({
@@ -142,16 +177,16 @@ var watchURLChange = function(host, port, win){
 	btnWrapView.add(backBtn);
 	btnWrapView.add(forwardBtn);
 	btnWrapView.add(reloadBtn);
-	btnWrapView.add(settingBtn);
+	//btnWrapView.add(settingBtn);
 	//btnWrapView.add(autoSwitch);
 	win.add(btnWrapView);
 	
 	//webview의 loding activity indicator
 	var toolActInd = Titanium.UI.createActivityIndicator({
 		width:30,
-		height:30
+		height:30,
+		style:Titanium.UI.iPhone.ActivityIndicatorStyle.DARK
 	});
-	toolActInd.style = Titanium.UI.iPhone.ActivityIndicatorStyle.DARK;
 	webview.add(toolActInd);
 	webview.addEventListener('load',function(e){
 		toolActInd.hide();
@@ -164,27 +199,6 @@ var watchURLChange = function(host, port, win){
 		backBtn.enabled = webview.canGoBack();
 	});
 })();
-win.open();	
+win.open();
 
-if (Titanium.Platform.name == 'iPhone OS') {
-	//iphone의 경우 socket으로 연결
-	watchURLChange("192.168.12.102", 8128, win);
-} else {
-	//android의 경우 
-	var oldModifyTime = "";
-	setInterval(function(){
-		var xhr = Ti.Network.createHTTPClient();
-		xhr.open("GET","http://192.168.12.102:8080/getURL");
-	    xhr.onload = function (){
-				var resultObj = JSON.parse(this.responseText);
-				oldMtime = resultObj.mTime;
-				if(oldModifyTime != resultObj.mTime){
-					oldModifyTime = resultObj.mTime;
-					//안드로이드 웹뷰의 경우 주소가 같으면 reload하지 않아 강제로 reload
-					if(webview.url == resultObj.url) webview.reload(); 
-					webview.url = resultObj.url;
-				}
-		};
-		xhr.send();	
-	},2000);
-}	
+watchURLChange(Titanium.Platform.address, 8128, win);
